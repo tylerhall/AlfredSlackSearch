@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>io.tyler.alfredapp.searchslack</string>
+	<key>connections</key>
+	<dict>
+		<key>2791B339-6D79-4072-85EA-9ACD84ED5B60</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>8BC82D67-EB1F-49A1-8A6E-A2780C5824F6</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>Tyler Hall</string>
+	<key>description</key>
+	<string></string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>Search Slack</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>plusspaces</key>
+				<false/>
+				<key>url</key>
+				<string>{query}</string>
+				<key>utf8</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.openurl</string>
+			<key>uid</key>
+			<string>8BC82D67-EB1F-49A1-8A6E-A2780C5824F6</string>
+			<key>version</key>
+			<integer>0</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>0</integer>
+				<key>escaping</key>
+				<integer>127</integer>
+				<key>keyword</key>
+				<string>slack</string>
+				<key>runningsubtext</key>
+				<string>Please Wait</string>
+				<key>script</key>
+				<string>	date_default_timezone_set('America/Los_Angeles');
+	
+	require_once('workflows.php');
+
+	function geturl($url, $username = null, $password = null)
+    {
+        if(function_exists('curl_init'))
+        {
+            $ch = curl_init();
+            if(!is_null($username) &amp;&amp; !is_null($password))
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: Basic ' .  base64_encode("$username:$password")));
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+            $html = curl_exec($ch);
+            curl_close($ch);
+            return $html;
+        }
+        elseif(ini_get('allow_url_fopen') == true)
+        {
+            if(!is_null($username) &amp;&amp; !is_null($password))
+                $url = str_replace("://", "://$username:$password@", $url);
+            $html = file_get_contents($url);
+            return $html;
+        }
+        else
+        {
+            // Cannot open url. Either install curl-php or set allow_url_fopen = true in php.ini
+            return false;
+        }
+    }
+	
+	$token = 'xoxp-2151167033-2151387500-2163778716-7303ba';
+	
+	$q = "{query}";
+
+	$url = "https://slack.com/api/search.all?token=$token&amp;query=$q";
+
+	$response = geturl($url);
+	
+	$json = json_decode($response);
+
+	$wf = new Workflows();
+	
+	foreach($json-&gt;messages-&gt;matches as $msg)
+	{
+		$dt = date('m/d/Y g:ia', $msg-&gt;ts);
+		$sub = $msg-&gt;username . ' @ ' . $dt . ' in ' . $msg-&gt;channel-&gt;name;
+		$wf-&gt;result( $int.'.'.time(), $msg-&gt;permalink, $msg-&gt;text, $sub, 'icon.png'  );
+		$int++;		
+	}
+
+	$results = $wf-&gt;results();
+	if ( count( $results ) == 0 )
+	{
+		$wf-&gt;result( 'slack', $q, 'No Results', 'No search results found.', 'icon.png' );
+	}
+
+	echo $wf-&gt;toxml();</string>
+				<key>title</key>
+				<string>Search Slack</string>
+				<key>type</key>
+				<integer>1</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>2791B339-6D79-4072-85EA-9ACD84ED5B60</string>
+			<key>version</key>
+			<integer>0</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string></string>
+	<key>uidata</key>
+	<dict>
+		<key>2791B339-6D79-4072-85EA-9ACD84ED5B60</key>
+		<dict>
+			<key>ypos</key>
+			<real>140</real>
+		</dict>
+		<key>8BC82D67-EB1F-49A1-8A6E-A2780C5824F6</key>
+		<dict>
+			<key>ypos</key>
+			<real>140</real>
+		</dict>
+	</dict>
+	<key>webaddress</key>
+	<string>http://tyler.io</string>
+</dict>
+</plist>
